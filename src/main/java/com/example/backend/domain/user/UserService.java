@@ -8,7 +8,7 @@ import com.example.backend.domain.post_scrap.PostScrapRepository;
 import com.example.backend.domain.region.RegionRepository;
 import com.example.backend.domain.signLogin.JoinRequest;
 import com.example.backend.domain.signLogin.LoginRequest;
-import com.example.backend.domain.user.kakao.service.KakaoService;
+//import com.example.backend.domain.user.kakao.service.KakaoService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,8 +22,7 @@ import java.util.Optional;
 @Transactional
 @RequiredArgsConstructor
 public class UserService {
-
-    private final KakaoService kakaoService;
+    //private final KakaoService kakaoService;
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder;
     private final PostRepository postRepository;
@@ -159,17 +158,17 @@ public class UserService {
         return false;
     }
 
-    @Transactional
-    public boolean deleteKakaoUser(Long id, String kakaoUserId) {
-        boolean isUnlinked = kakaoService.unlinkKakaoUser(kakaoUserId);
-
-        if(isUnlinked) {
-            updateToDeletedUser(id);
-            userRepository.deleteById(id);
-            return true;
-        }
-        return false;
-    }
+//    @Transactional
+//    public boolean deleteKakaoUser(Long id, String kakaoUserId) {
+//        boolean isUnlinked = kakaoService.unlinkKakaoUser(kakaoUserId);
+//
+//        if(isUnlinked) {
+//            updateToDeletedUser(id);
+//            userRepository.deleteById(id);
+//            return true;
+//        }
+//        return false;
+//    }
 
     public void updateToDeletedUser(Long userId) {
         commentRepository.updateCommentsToDeletedUser(userId, getDeletedUserPlaceholder());
