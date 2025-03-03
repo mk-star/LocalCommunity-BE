@@ -1,7 +1,7 @@
 package com.example.backend.domain.user;
 
 import com.example.backend.domain.comment_like.CommentLike;
-import com.example.backend.domain.post_like.PostLike;
+import com.example.backend.domain.post_like.entity.PostLike;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
