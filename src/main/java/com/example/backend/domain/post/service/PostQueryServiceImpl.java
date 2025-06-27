@@ -1,6 +1,5 @@
 package com.example.backend.domain.post.service;
 
-import com.example.backend.domain.category.entity.QCategory;
 import com.example.backend.domain.post.converter.PostConverter;
 import com.example.backend.domain.post.dto.PostResponseDTO;
 import com.example.backend.domain.post.entity.Post;
@@ -29,33 +28,42 @@ public class PostQueryServiceImpl implements PostQueryService {
     private final JPAQueryFactory jpaQueryFactory;
     private final RedisUtil redisUtil;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public PostResponseDTO.PostPreViewDTO getPost(Long postId, Long userId) {
-        Post post = postRepository.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+        Post post = postRepository.findByByWithPessimisticLock(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
 
-        // 게시글 조회수
-        String postViewKey = "post:" + post.getId();
+        int view = increaseViewCont(postId, userId);
+        post.setView(view);
+
+        return PostConverter.postPreViewDTO(post);
+    }
+
+    private int increaseViewCont(Long postId, Long userId) {
+        String postViewKey = "post:" + postId;
         int view;
+
         if (redisUtil.get(postViewKey) == null) {
             // Redis에 게시글 조회수 0으로 세팅
-            redisUtil.set(post.getId().toString(), 0);
+            redisUtil.set(postViewKey, 0);
             view = 0;
         } else {
             view = (int) redisUtil.get(postViewKey);
         }
 
-        // 유저별 개별 게시글 방문 기록 (user:1:post:2)
-        String visitedKey = "user:" + userId + ":post:" + post.getId();
+        String userKey = "user:" + userId + ":post:" + postId;
 
-        // Redis에서 해당 유저가 이 게시글을 방문한 적이 있는지 확인
-        Boolean isVisted = redisUtil.exists(visitedKey);
-        if (Boolean.FALSE.equals(isVisted)) {
-            redisUtil.set(visitedKey, 1);
-            redisUtil.expire(visitedKey, 24, TimeUnit.HOURS);
+        if (!isVisited(userKey)) {
+            redisUtil.set(userKey, 1);
+            redisUtil.expire(userKey, 24, TimeUnit.HOURS);
             redisUtil.set(postViewKey, view + 1);
-            post.setView(view + 1);
+            view += 1;
         }
-        return PostConverter.postPreViewDTO(post);
+        return view;
+    }
+
+    // Redis에서 해당 유저가 이 게시글을 방문한 적이 있는지 확인
+    private boolean isVisited(String visitedKey) {
+        return redisUtil.exists(visitedKey);
     }
 
     @Override

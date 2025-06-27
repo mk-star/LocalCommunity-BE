@@ -1,7 +1,7 @@
 package com.example.backend.domain.post.entity;
 
-import com.example.backend.domain.category.entity.Category;
-import com.example.backend.domain.comment.entity.Comment;
+import com.example.backend.domain.category.Category;
+import com.example.backend.domain.comment.Comment;
 import com.example.backend.domain.post_image.entity.PostImage;
 import com.example.backend.domain.post_like.entity.PostLike;
 import com.example.backend.domain.post_scrap.entity.PostScrap;
@@ -48,6 +48,9 @@ public class Post extends BaseEntity {
 
     @Column(name = "scrap_count", columnDefinition = "integer default 0")
     private int scrapCount;
+
+    @Version
+    private int version;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
