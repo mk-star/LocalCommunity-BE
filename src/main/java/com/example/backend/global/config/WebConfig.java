@@ -18,6 +18,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "https://api.townin.site" // API 서브도메인
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
                 .allowCredentials(true);
     }
 }

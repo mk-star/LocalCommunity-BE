@@ -1,10 +1,10 @@
 package com.example.backend.domain.user;
 
-import com.example.backend.domain.comment.CommentRepository;
+import com.example.backend.domain.comment.repository.CommentRepository;
 import com.example.backend.domain.comment_like.CommentLikeRepository;
-import com.example.backend.domain.post.PostRepository;
-import com.example.backend.domain.post_like.PostLikeRepository;
-import com.example.backend.domain.post_scrap.PostScrapRepository;
+import com.example.backend.domain.post.repository.PostRepository;
+import com.example.backend.domain.post_like.repository.PostLikeRepository;
+import com.example.backend.domain.post_scrap.repository.PostScrapRepository;
 import com.example.backend.domain.region.RegionRepository;
 import com.example.backend.domain.signLogin.JoinRequest;
 import com.example.backend.domain.signLogin.LoginRequest;
@@ -151,7 +151,7 @@ public class UserService {
         Optional<User> userOptional = userRepository.findById(id);
         if(userOptional.isPresent()) {
             User user = userOptional.get();
-            updateToDeletedUser(id);
+            //updateToDeletedUser(id);
             userRepository.delete(user);
             return true;
         }
@@ -170,14 +170,14 @@ public class UserService {
 //        return false;
 //    }
 
-    public void updateToDeletedUser(Long userId) {
-        commentRepository.updateCommentsToDeletedUser(userId, getDeletedUserPlaceholder());
-        commentLikeRepository.updateCommentLikeToDeletedUser(userId, getDeletedUserPlaceholder());
-        postRepository.updatePostsToDeletedUser(userId, getDeletedUserPlaceholder());
-        postLikeRepository.updatePostLikeToDeletedUser(userId, getDeletedUserPlaceholder());
-        postScrapRepository.updatePostScrapToDeletedUser(userId, getDeletedUserPlaceholder());
-        regionRepository.updateRegionToDeletedUser(userId, getDeletedUserPlaceholder());
-    }
+//    public void updateToDeletedUser(Long userId) {
+//        commentRepository.updateCommentsToDeletedUser(userId, getDeletedUserPlaceholder());
+//        commentLikeRepository.updateCommentLikeToDeletedUser(userId, getDeletedUserPlaceholder());
+//        postRepository.updatePostsToDeletedUser(userId, getDeletedUserPlaceholder());
+//        postLikeRepository.updatePostLikeToDeletedUser(userId, getDeletedUserPlaceholder());
+//        postScrapRepository.updatePostScrapToDeletedUser(userId, getDeletedUserPlaceholder());
+//        regionRepository.updateRegionToDeletedUser(userId, getDeletedUserPlaceholder());
+//    }
 
     @Transactional
     public User getDeletedUserPlaceholder() {
