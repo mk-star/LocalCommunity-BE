@@ -9,6 +9,7 @@ import com.example.backend.domain.post_image.converter.PostImageConverter;
 import com.example.backend.domain.post_image.dto.PostImageResponseDTO;
 import com.example.backend.domain.signLogin.JwtTokenUtil;
 import com.example.backend.global.apiPayload.ApiResponse;
+import com.example.backend.global.util.RedisUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -29,6 +30,7 @@ import java.util.Optional;
 public class PostController {
     private final PostCommandService postCommandService;
     private final PostQueryService postQueryService;
+    private final RedisUtil redisUtil;
 
     @PostMapping("")
     @Operation(summary = "게시글 생성", description = "게시글을 생성합니다.")
@@ -57,7 +59,7 @@ public class PostController {
     public ApiResponse<PostResponseDTO.PostPreViewListDTO> getPostList(@RequestParam(value = "categoryId", required = false) Long categoryId,
                                                                        @RequestParam(value = "keyword", required = false) String keyword,
                                                                        @RequestParam(name = "page") Integer page) {
-        return ApiResponse.onSuccess(PostConverter.postPreViewListDTO(postQueryService.getPostList(categoryId, keyword, page)));
+        return ApiResponse.onSuccess(PostConverter.postPreViewListDTO(postQueryService.getPostList(categoryId, keyword, page), redisUtil));
     }
 
     @Operation(summary = "게시글 수정", description = "게시글의 제목, 내용, 이미지를 수정합니다.")

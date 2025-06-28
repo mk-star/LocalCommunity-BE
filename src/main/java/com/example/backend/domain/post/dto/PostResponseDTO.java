@@ -31,7 +31,7 @@ public class PostResponseDTO {
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
         private List<String> postImages;
-        private Integer views;
+        private long views;
     }
 
     @Builder

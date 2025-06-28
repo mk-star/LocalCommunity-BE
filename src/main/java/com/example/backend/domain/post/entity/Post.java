@@ -40,8 +40,8 @@ public class Post extends BaseEntity {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    @Column(columnDefinition = "integer default 0", nullable = false)
-    private int view;
+    @Column(nullable = false)
+    private Long view;
 
     @Column(name = "like_count", columnDefinition = "integer default 0")
     private int likeCount;
@@ -49,8 +49,8 @@ public class Post extends BaseEntity {
     @Column(name = "scrap_count", columnDefinition = "integer default 0")
     private int scrapCount;
 
-    @Version
-    private int version;
+//    @Version
+//    private int version;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
@@ -69,7 +69,7 @@ public class Post extends BaseEntity {
         this.content = content;
     }
 
-    public void setView(int view) {
+    public void setView(long view) {
         this.view = view;
     }
 

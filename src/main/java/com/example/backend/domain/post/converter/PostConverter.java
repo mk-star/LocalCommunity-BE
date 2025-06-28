@@ -1,12 +1,13 @@
 package com.example.backend.domain.post.converter;
 
-import com.example.backend.domain.category.entity.Category;
+import com.example.backend.domain.category.Category;
 import com.example.backend.domain.post.dto.PostRequestDTO;
 import com.example.backend.domain.post.dto.PostResponseDTO;
 import com.example.backend.domain.post.entity.Post;
 import com.example.backend.domain.post_image.entity.PostImage;
 import com.example.backend.domain.user.User;
 import com.example.backend.domain.user.converter.UserConverter;
+import com.example.backend.global.util.RedisUtil;
 import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
@@ -29,14 +30,14 @@ public class PostConverter {
                 .build();
     }
 
-    public static PostResponseDTO.PostPreViewDTO postPreViewDTO(Post post) {
+    public static PostResponseDTO.PostPreViewDTO postPreViewDTO(Post post, Long view) {
         return PostResponseDTO.PostPreViewDTO.builder()
                 .postId(post.getId())
                 .userInfo(UserConverter.toUserInfo(post.getUser()))
                 .categoryId(post.getCategory().getId())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .views(post.getView())
+                .views(view)
                 .likeCount(post.getLikeCount())
                 .scrapCount(post.getScrapCount())
                 .createdAt(post.getCreatedAt())
@@ -45,9 +46,15 @@ public class PostConverter {
                 .build();
     }
 
-    public static PostResponseDTO.PostPreViewListDTO postPreViewListDTO(Page<Post> postList){
+    public static PostResponseDTO.PostPreViewListDTO postPreViewListDTO(Page<Post> postList, RedisUtil redisUtil) {
         List<PostResponseDTO.PostPreViewDTO> postPreViewDTOList = postList.stream()
-                .map(PostConverter::postPreViewDTO).collect(Collectors.toList());
+                .map(post -> {
+                    String redisKey = "post:" + post.getId();
+                    Object viewObj = redisUtil.get(redisKey);
+                    Long view = viewObj == null ? post.getView() : Long.parseLong(viewObj.toString());
+                    return postPreViewDTO(post, view);
+                })
+                .collect(Collectors.toList());
 
         return PostResponseDTO.PostPreViewListDTO.builder()
                 .isLast(postList.isLast())
@@ -58,6 +65,7 @@ public class PostConverter {
                 .postList(postPreViewDTOList)
                 .build();
     }
+
 
     public static PostResponseDTO.UpdatePostResponseDTO toUpdatePostResultDTO(Post post) {
         return PostResponseDTO.UpdatePostResponseDTO.builder()

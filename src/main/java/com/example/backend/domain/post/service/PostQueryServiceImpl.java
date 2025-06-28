@@ -30,33 +30,31 @@ public class PostQueryServiceImpl implements PostQueryService {
 
     @Transactional
     public PostResponseDTO.PostPreViewDTO getPost(Long postId, Long userId) {
-        Post post = postRepository.findByByWithPessimisticLock(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+        Post post = postRepository.findById(postId).orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
 
-        int view = increaseViewCont(postId, userId);
-        post.setView(view);
+        long view = increaseViewCont(post, postId, userId);
 
-        return PostConverter.postPreViewDTO(post);
+        return PostConverter.postPreViewDTO(post, view);
     }
 
-    private int increaseViewCont(Long postId, Long userId) {
-        String postViewKey = "post:" + postId;
-        int view;
+    private Long increaseViewCont(Post post, Long postId, Long userId) {
+        String postKey = "post:" + postId;
+        Long view = 0L;
 
-        if (redisUtil.get(postViewKey) == null) {
-            // Redis에 게시글 조회수 0으로 세팅
-            redisUtil.set(postViewKey, 0);
-            view = 0;
+        if (redisUtil.get(postKey) == null) {
+            view = post.getView();
+            redisUtil.set(postKey, String.valueOf(view));
+            redisUtil.expire(postKey, 25, TimeUnit.HOURS);
         } else {
-            view = (int) redisUtil.get(postViewKey);
+            view = Long.parseLong(redisUtil.get(postKey));
         }
 
         String userKey = "user:" + userId + ":post:" + postId;
 
         if (!isVisited(userKey)) {
-            redisUtil.set(userKey, 1);
+            redisUtil.set(userKey, "1");
             redisUtil.expire(userKey, 24, TimeUnit.HOURS);
-            redisUtil.set(postViewKey, view + 1);
-            view += 1;
+            view = redisUtil.incr(postKey, 1L);
         }
         return view;
     }
